@@ -16,23 +16,24 @@
 
 package ru.makkarpov.playutils
 
-import java.util.concurrent.Executors
+import com.github.tminglei.slickpg.ExPostgresProfile
+import ru.makkarpov.playutils.slickutils.BinaryFlags.BinaryFlagsSupport
+import ru.makkarpov.playutils.slickutils.EnumerationSupport
 
-import slick.jdbc.JdbcProfile
+/**
+  * Created by makkarpov on 31.01.17.
+  */
+object MyDriver extends ExPostgresProfile with EnumerationSupport with BinaryFlagsSupport {
+  lazy val database = api.Database.forURL(
+    url       = "jdbc:postgresql://localhost/play-utils-test",
+    user      = "play-utils-test",
+    password  = "play-utils-test",
+    driver    = "org.postgresql.Driver"
+  )
 
-import scala.concurrent.ExecutionContext
+  override val api = MyAPI
 
-object TestUtils {
-  trait DatabaseProvider { driver: JdbcProfile =>
-    import driver.api._
+  object MyAPI extends API with BinaryFlagsImplicits with EnumerationImplicits {
 
-    lazy val database = Database.forURL(
-      url       = "jdbc:postgresql://localhost/play-utils-test",
-      user      = "play-utils-test",
-      password  = "play-utils-test",
-      driver    = "org.postgresql.Driver"
-    )
   }
-
-  implicit val testExecContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))
 }

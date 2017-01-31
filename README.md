@@ -5,4 +5,5 @@ A small reusable pieces of code for Play Framework and Slick that will (hopefull
 
 Currently supported features:
 
+* Plain `Enumeration` mapped to `Int`s;
 * `BinaryFlags` enumeration which is stored in database as `Long` or `Int`.

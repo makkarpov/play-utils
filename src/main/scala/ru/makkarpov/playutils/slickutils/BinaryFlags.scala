@@ -16,6 +16,7 @@
 
 package ru.makkarpov.playutils.slickutils
 
+import ru.makkarpov.playutils.slickutils.EnumerationSupport.EnumerationProvider
 import slick.ast.Library.SqlOperator
 import slick.ast.{Library, TypedType}
 import slick.jdbc.{JdbcProfile, JdbcType}
@@ -32,10 +33,13 @@ object BinaryFlags {
     private lazy val zero = LiteralColumn(0).toNode
 
     trait BinaryFlagsImplicits {
-      def binaryFlagsType(flags: BinaryFlags): BaseColumnType[flags.ValueSet] =
-        MappedColumnType.base[flags.ValueSet, Long](
+      implicit def valueToValueSet[F <: BinaryFlags](v: F#Value)(implicit ep: EnumerationProvider[F]): F#ValueSet =
+        ep.valueSet(v)
+
+      implicit def binaryFlagsType[F <: BinaryFlags](implicit ep: EnumerationProvider[F]): BaseColumnType[F#ValueSet] =
+        MappedColumnType.base[F#ValueSet, Long](
           flags => flags.foldLeft(0L)((bits, flag) => bits | (1L << flag.id)),
-          bits => flags.values.filter(flag => (bits & (1L << flag.id)) != 0)
+          bits => ep.enumeration.values.filter(flag => (bits & (1L << flag.id)) != 0)
         )
 
       implicit class FlagsExtensionMethods[F <: BinaryFlags](val c: Rep[F#ValueSet])(implicit tt: JdbcType[F#ValueSet])
@@ -83,6 +87,4 @@ object BinaryFlags {
   */
 class BinaryFlags extends Enumeration {
   val empty = ValueSet()
-
-  implicit def value2valueSet(bf: Value): ValueSet = empty + bf
 }

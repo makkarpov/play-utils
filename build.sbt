@@ -5,6 +5,7 @@ description := "An utility classes that will make your life easier"
 version := "0.1"
 
 scalaVersion := "2.11.8"
+//crossScalaVersions := Seq("2.11.8", "2.12.1") fails on 2.12.1 for some reason
 libraryDependencies := Seq(
   "com.typesafe.slick" %% "slick" % "3.2.0-M2",
   "org.scalatest" %% "scalatest" % "3.0.1" % Test,

@@ -17,62 +17,49 @@
 package ru.makkarpov.playutils
 
 import org.scalatest.FunSuite
-import ru.makkarpov.playutils.slickutils.BinaryFlags
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class BinaryFlagsSuite extends FunSuite {
+class EnumerationSuite extends FunSuite {
   import MyDriver.api._
 
-  type TestFlags = TestFlags.ValueSet
-  object TestFlags extends BinaryFlags {
-    val Harder = Value
-    val Better = Value
-    val Faster = Value
-    val Stronger = Value
+  implicit val langEnumType = enumerationType(LangEnum)
+  type LangEnum = LangEnum.Value
+  object LangEnum extends Enumeration {
+    val Java = Value
+    val Scala = Value
+    val Groovy = Value
+    val Clojure = Value
   }
 
-  implicit val testFlagsType = enumerationType(TestFlags)
+  case class EnumBean(id: Long, lang: LangEnum)
 
-  case class EnumBean(id: Long, flags: TestFlags)
-
-  class EnumTable(t: Tag) extends Table[EnumBean](t, "binary_enum_test") {
+  class EnumTable(t: Tag) extends Table[EnumBean](t, "enum_test") {
     def id      = column[Long]("id", O.AutoInc, O.PrimaryKey)
-    def flags   = column[TestFlags]("flags")
+    def lang    = column[LangEnum]("lang")
 
-    def * = (id, flags) <> ((EnumBean.apply _).tupled, EnumBean.unapply)
+    def * = (id, lang) <> ((EnumBean.apply _).tupled, EnumBean.unapply)
   }
 
   val query = TableQuery[EnumTable]
 
   val testData = Seq(
-    EnumBean(1, TestFlags.empty),
-    EnumBean(2, TestFlags.values),
-    EnumBean(3, TestFlags.Harder),
-    EnumBean(4, TestFlags.Better),
-    EnumBean(5, TestFlags.Harder + TestFlags.Stronger),
-    EnumBean(6, TestFlags.Faster + TestFlags.Better)
+    EnumBean(1, LangEnum.Java),
+    EnumBean(2, LangEnum.Groovy),
+    EnumBean(3, LangEnum.Scala),
+    EnumBean(4, LangEnum.Clojure)
   )
 
-  def test(f: EnumTable => Rep[Boolean], r: List[Long]) =
-    query.sortBy(_.id).filter(f).map(_.id).to[List].result.map(x => assert(x === r))
-
-  test("BinaryFlags support") {
+  test("Enumeration support") {
     Await.result(MyDriver.database.run(
       DBIO.seq(
         query.schema.create,
         query.forceInsertAll(testData)
       ).andThen(DBIO.seq(
-        test(_ => true, List(1, 2, 3, 4, 5, 6)),
-        test(_.flags && TestFlags.Better, List(2, 4, 6)),
-        test(_.flags &! TestFlags.Better, List(1, 3, 5)),
-        test(_.flags && (TestFlags.Better + TestFlags.Faster), List(2, 6)),
-        test(_.flags && (TestFlags.Harder + TestFlags.Faster), List(2)),
-        test(_.flags &! (TestFlags.Harder + TestFlags.Faster), List(1, 4)),
-        test(_.flags &? (TestFlags.Harder + TestFlags.Stronger), List(2, 3, 5)),
-        test(_.flags.isEmpty, List(1)),
-        test(_.flags.nonEmpty, List(2, 3, 4, 5, 6))
+        sql"SELECT lang FROM enum_test WHERE id = 2".as[Int].map(x => assert(x === Vector(LangEnum.Groovy.id))),
+        query.filter(_.lang === LangEnum.Scala).map(_.id).result.map(x => assert(x === List(3))),
+        query.filter(_.lang >= LangEnum.Scala).map(_.id).result.map(x => assert(x == List(2, 3, 4)))
       )).andFinally(query.schema.drop).transactionally
     ), 10 seconds span)
   }
