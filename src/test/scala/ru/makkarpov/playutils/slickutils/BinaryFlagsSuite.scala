@@ -14,10 +14,9 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package ru.makkarpov.playutils
+package ru.makkarpov.playutils.slickutils
 
 import org.scalatest.FunSuite
-import ru.makkarpov.playutils.slickutils.BinaryFlags
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

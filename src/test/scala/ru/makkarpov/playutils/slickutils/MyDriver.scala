@@ -14,15 +14,25 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package ru.makkarpov
+package ru.makkarpov.playutils.slickutils
 
-import java.util.concurrent.Executors
-
-import scala.concurrent.ExecutionContext
+import com.github.tminglei.slickpg.ExPostgresProfile
+import ru.makkarpov.playutils.slickutils.BinaryFlags.BinaryFlagsSupport
 
 /**
   * Created by makkarpov on 31.01.17.
   */
-package object playutils {
-  implicit val testExecContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))
+object MyDriver extends ExPostgresProfile with EnumerationSupport with BinaryFlagsSupport with MiscSupport {
+  lazy val database = api.Database.forURL(
+    url       = "jdbc:postgresql://localhost/play-utils-test",
+    user      = "play-utils-test",
+    password  = "play-utils-test",
+    driver    = "org.postgresql.Driver"
+  )
+
+  override val api = MyAPI
+
+  object MyAPI extends API with BinaryFlagsImplicits with EnumerationImplicits with MiscImplicits {
+
+  }
 }

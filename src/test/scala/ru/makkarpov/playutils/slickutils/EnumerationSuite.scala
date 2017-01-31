@@ -14,7 +14,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package ru.makkarpov.playutils
+package ru.makkarpov.playutils.slickutils
 
 import org.scalatest.FunSuite
 

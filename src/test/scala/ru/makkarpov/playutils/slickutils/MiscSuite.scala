@@ -14,26 +14,42 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-package ru.makkarpov.playutils
+package ru.makkarpov.playutils.slickutils
 
-import com.github.tminglei.slickpg.ExPostgresProfile
-import ru.makkarpov.playutils.slickutils.BinaryFlags.BinaryFlagsSupport
-import ru.makkarpov.playutils.slickutils.EnumerationSupport
+import org.scalatest.FunSuite
 
-/**
-  * Created by makkarpov on 31.01.17.
-  */
-object MyDriver extends ExPostgresProfile with EnumerationSupport with BinaryFlagsSupport {
-  lazy val database = api.Database.forURL(
-    url       = "jdbc:postgresql://localhost/play-utils-test",
-    user      = "play-utils-test",
-    password  = "play-utils-test",
-    driver    = "org.postgresql.Driver"
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
+class MiscSuite extends FunSuite {
+  import MyDriver.api._
+
+  case class TestBean(id: Long, str: String)
+
+  class TestTable(t: Tag) extends Table[TestBean](t, "test") {
+    def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    def str = column[String]("str")
+
+    def * = (id, str) <> ((TestBean.apply _).tupled, TestBean.unapply)
+  }
+
+  val testQuery = TableQuery[TestTable]
+
+  val testData = Seq(
+    TestBean(1, "scala"),
+    TestBean(2, "java"),
+    TestBean(3, "groovy")
   )
 
-  override val api = MyAPI
-
-  object MyAPI extends API with BinaryFlagsImplicits with EnumerationImplicits {
-
+  test("resultFirst should work") {
+    Await.result(MyDriver.database.run(
+      DBIO.seq(
+        testQuery.schema.create,
+        testQuery.forceInsertAll(testData)
+      ).andThen(DBIO.seq(
+        testQuery.sortBy(_.id).filter(_.id > 1L).map(_.id).resultFirst.map(x => assert(x === Some(2))),
+        testQuery.filter(_.id === 100L).map(_.id).resultFirst.map(x => assert(x === None))
+      )).andFinally(testQuery.schema.drop).transactionally
+    ), 10 seconds span)
   }
 }
