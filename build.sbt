@@ -1,7 +1,7 @@
 organization := "ru.makkarpov"
 name := "Play Utils"
 normalizedName := "play-utils"
-description := "An utility classes that will make your life easier"
+description := "A small reusable pieces of code for Play Framework and Slick that will (hopefully) make your life easier."
 version := "0.1"
 
 scalaVersion := "2.11.8"
@@ -16,12 +16,12 @@ libraryDependencies := Seq(
 )
 
 licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
-homepage := Some(url("https://github.com/makkarpov/scalingua"))
+homepage := Some(url("https://github.com/makkarpov/play-utils"))
 organizationName := "Maxim Karpov"
 organizationHomepage := Some(url("https://github.com/makkarpov"))
 scmInfo := Some(ScmInfo(
-  browseUrl = url("https://github.com/makkarpov/scalingua"),
-  connection = "scm:git://github.com/makkarpov/scalingua.git"
+  browseUrl = url("https://github.com/makkarpov/play-utils"),
+  connection = "scm:git://github.com/makkarpov/play-utils.git"
 ))
 
 pomExtra := {
