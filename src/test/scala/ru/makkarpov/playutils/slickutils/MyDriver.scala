@@ -19,16 +19,27 @@ package ru.makkarpov.playutils.slickutils
 import com.github.tminglei.slickpg.ExPostgresDriver
 import ru.makkarpov.playutils.slickutils.BinaryFlags.BinaryFlagsSupport
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 /**
   * Created by makkarpov on 31.01.17.
   */
 object MyDriver extends ExPostgresDriver with EnumerationSupport with BinaryFlagsSupport with MiscSupport {
-  lazy val database = api.Database.forURL(
-    url       = "jdbc:postgresql://localhost/play-utils-test",
-    user      = "play-utils-test",
-    password  = "play-utils-test",
-    driver    = "org.postgresql.Driver"
-  )
+  lazy val database = {
+    val drv = api.Database.forURL(
+      url       = "jdbc:postgresql://localhost/play-utils-test",
+      user      = "play-utils-test",
+      password  = "play-utils-test",
+      driver    = "org.postgresql.Driver"
+    )
+
+    // workaround for https://github.com/slick/slick/issues/1400
+    import api._
+    Await.ready(drv.run(sql"SELECT 1".as[Int]), 10 seconds span)
+
+    drv
+  }
 
   override val api = MyAPI
 
