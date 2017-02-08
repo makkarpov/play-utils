@@ -16,7 +16,7 @@
 
 package ru.makkarpov.playutils.slickutils
 
-import slick.jdbc.JdbcProfile
+import slick.driver.JdbcProfile
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
@@ -28,6 +28,11 @@ trait MiscSupport { driver: JdbcProfile =>
     implicit class QueryExtensions[E, U, C[X] <: Seq[X]](val q: Query[E, U, C]) {
       def resultFirst(implicit ec: ExecutionContext): DBIOAction[Option[U], NoStream, Effect.Read] =
         q.take(1).result.map(_.headOption)
+    }
+
+    implicit class StringExtensions(val a: Rep[String]) {
+      /** Case-insensitive string comparison */
+      def =~= (b: Rep[String]) = a.toLowerCase === b.toLowerCase
     }
   }
 }

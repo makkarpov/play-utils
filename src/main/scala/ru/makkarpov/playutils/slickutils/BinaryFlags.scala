@@ -19,7 +19,8 @@ package ru.makkarpov.playutils.slickutils
 import ru.makkarpov.playutils.slickutils.EnumerationSupport.EnumerationProvider
 import slick.ast.Library.SqlOperator
 import slick.ast.{Library, TypedType}
-import slick.jdbc.{JdbcProfile, JdbcType}
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcType
 import slick.lifted.ExtensionMethods
 
 import scala.language.implicitConversions

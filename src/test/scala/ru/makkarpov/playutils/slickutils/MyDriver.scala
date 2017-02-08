@@ -16,13 +16,13 @@
 
 package ru.makkarpov.playutils.slickutils
 
-import com.github.tminglei.slickpg.ExPostgresProfile
+import com.github.tminglei.slickpg.ExPostgresDriver
 import ru.makkarpov.playutils.slickutils.BinaryFlags.BinaryFlagsSupport
 
 /**
   * Created by makkarpov on 31.01.17.
   */
-object MyDriver extends ExPostgresProfile with EnumerationSupport with BinaryFlagsSupport with MiscSupport {
+object MyDriver extends ExPostgresDriver with EnumerationSupport with BinaryFlagsSupport with MiscSupport {
   lazy val database = api.Database.forURL(
     url       = "jdbc:postgresql://localhost/play-utils-test",
     user      = "play-utils-test",
